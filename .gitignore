@@ -1,0 +1,6 @@
+
+.env.example
+dist
+.vscode
+generated
+node_modules

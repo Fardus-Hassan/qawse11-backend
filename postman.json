@@ -1,0 +1,1152 @@
+{
+  "info": {
+    "name": "Qwasee-Backend-2.0",
+    "description": "Postman collection for the backend_starter_pack_with_postgres project. Base URL: /api/v1. Run Login or Verify OTP first to set {{access_token}} and {{refresh_token}}. Use the collection variables or an environment file for different targets.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "a1b2c3d4-5678-90ab-cdef-000000000001"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5005/api/v1",
+      "type": "string",
+      "description": "Base URL for the API"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string",
+      "description": "Access token (set by Login / Verify OTP)"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "Refresh token cookie value"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string",
+      "description": "User id used in tests"
+    },
+    {
+      "key": "last_form_id",
+      "value": "",
+      "type": "string",
+      "description": "ID of the most recently created form (for test use)"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send OTP - POST /auth/send-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"purpose\": \"VERIFY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "send-otp"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"OTP sent successfully.\",\"meta\":null,\"data\":null}"
+            },
+            {
+              "name": "Failure - 404 (User not found)",
+              "originalRequest": {},
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":404,\"message\":\"User not found!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"User not found!\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Resend OTP - POST /auth/resend-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"purpose\": \"VERIFY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/resend-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "resend-otp"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"OTP sent successfully.\",\"meta\":null,\"data\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP - POST /auth/verify-otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"purpose\": \"VERIFY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  pm.test(\"Access token present\", function () { pm.expect(res.data.accessToken).to.exist; });",
+                  "  if (res && res.data && res.data.accessToken) {",
+                  "    pm.collectionVariables.set(\"access_token\", res.data.accessToken);",
+                  "  }",
+                  "  var sc = pm.response.headers.get(\"set-cookie\") || pm.response.headers.get(\"Set-Cookie\");",
+                  "  if (sc) {",
+                  "    var m = sc.match(/refreshToken=([^;]+);/);",
+                  "    if (m) pm.collectionVariables.set(\"refresh_token\", m[1]);",
+                  "  }",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200 (returns accessToken & sets refresh cookie)",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Set-Cookie",
+                  "value": "refreshToken=<token>; HttpOnly"
+                }
+              ],
+              "body": "{\"success\":true,\"message\":\"OTP verified successfully! You are now authenticated.\",\"meta\":null,\"data\":{\"accessToken\":\"<ACCESS_TOKEN>\"}}"
+            },
+            {
+              "name": "Failure - 400 (Invalid/Expired OTP)",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"OTP expired\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"OTP expired\"}],\"stack\":null}"
+            }
+          ]
+        },
+
+        {
+          "name": "Login - POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  pm.test(\"Access token present\", function () { pm.expect(res.data.accessToken).to.exist; });",
+                  "  if (res && res.data && res.data.accessToken) {",
+                  "    pm.collectionVariables.set(\"access_token\", res.data.accessToken);",
+                  "  }",
+                  "  var sc = pm.response.headers.get(\"set-cookie\") || pm.response.headers.get(\"Set-Cookie\");",
+                  "  if (sc) {",
+                  "    var m = sc.match(/refreshToken=([^;]+);/);",
+                  "    if (m) pm.collectionVariables.set(\"refresh_token\", m[1]);",
+                  "  }",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200 (returns accessToken & sets refresh cookie)",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Set-Cookie",
+                  "value": "refreshToken=<token>; HttpOnly"
+                }
+              ],
+              "body": "{\"success\":true,\"message\":\"User logged in successfully!\",\"meta\":null,\"data\":{\"accessToken\":\"<ACCESS_TOKEN>\"}}"
+            },
+            {
+              "name": "Failure - 401 (Invalid credentials / not verified)",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":401,\"message\":\"Password is incorrect!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"Password is incorrect!\"}],\"stack\":null}"
+            }
+          ]
+        },
+
+        {
+          "name": "Get Me - GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.id && !pm.collectionVariables.get(\"user_id\")) pm.collectionVariables.set(\"user_id\", res.data.id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User fetched successfully!\",\"meta\":null,\"data\":{\"id\":\"64b7b5e8f0c7e4a9b1234567\",\"fullName\":\"John Doe\",\"email\":\"user@example.com\",\"role\":\"USER\",\"profilePic\":\"\",\"isVerified\":true}}"
+            },
+            {
+              "name": "Failure - 401 (Missing token)",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":401,\"message\":\"You are not authorized\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"You are not authorized\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token - POST /auth/refresh-token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "refreshToken={{refresh_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.accessToken) pm.collectionVariables.set(\"access_token\", res.data.accessToken);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200 (returns new accessToken)",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Access token is retrieved successfully!\",\"meta\":null,\"data\":{\"accessToken\":\"<NEW_ACCESS_TOKEN>\"}}"
+            },
+            {
+              "name": "Failure - 401 (Invalid/Expired refresh token)",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":401,\"message\":\"Your session has expired. Please log in again.\",\"errorMessages\":[{\"path\":\"token\",\"message\":\"Token expired at 2025-01-01T00:00:00.000Z\"}],\"stack\":null}"
+            }
+          ]
+        },
+
+        {
+          "name": "Change Password - PUT /auth/change-password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"oldPass123\",\n  \"newPassword\": \"newPass456\",\n  \"confirmPassword\": \"newPass456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User password changed successfully!\",\"meta\":null,\"data\":null}"
+            },
+            {
+              "name": "Failure - 401 (Incorrect current password)",
+              "originalRequest": {},
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":401,\"message\":\"Current password is incorrect!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"Current password is incorrect!\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password - POST /auth/forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"We have sent a reset OTP to your email address. Please check your inbox.\",\"meta\":null,\"data\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Reset Password - POST /auth/reset-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newPass456\",\n  \"confirmPassword\": \"newPass456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "reset-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Password reset successfully!\",\"meta\":null,\"data\":null}"
+            },
+            {
+              "name": "Failure - 400 (Passwords do not match)",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"Passwords do not match!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"Passwords do not match!\"}],\"stack\":null}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Register User - POST /users/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/register",
+              "host": ["{{base_url}}"],
+              "path": ["users", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.id) pm.collectionVariables.set(\"user_id\", res.data.id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 201",
+              "originalRequest": {},
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"We have sent a confirmation OTP to your email address. Please check your inbox.\",\"meta\":null,\"data\":null}"
+            },
+            {
+              "name": "Failure - 400 (Email already exists)",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"User with this email: jane@example.com already exists!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"User with this email: jane@example.com already exists!\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Users - GET /users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200 (paginated)",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Users are retrieved successfully!\",\"meta\":{\"page\":1,\"limit\":10,\"total\":1,\"totalPage\":1},\"data\":[{\"id\":\"64b7b5e8f0c7e4a9b1234567\",\"fullName\":\"Jane Doe\",\"email\":\"jane@example.com\",\"role\":\"USER\",\"profilePic\":\"\"}]}"
+            },
+            {
+              "name": "Failure - 403 (Forbidden for non-admin)",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":403,\"message\":\"You don't have permission to access this resource\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"You don't have permission to access this resource\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Get Single User - GET /users/:userId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User retrieved successfully!\",\"meta\":null,\"data\":{\"id\":\"64b7b5e8f0c7e4a9b1234567\",\"fullName\":\"Jane Doe\",\"email\":\"jane@example.com\",\"role\":\"USER\",\"profilePic\":\"\"}}"
+            },
+            {
+              "name": "Failure - 404 (User not found)",
+              "originalRequest": {},
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":404,\"message\":\"User not found!\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"User not found!\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Update User - PATCH /users/update (multipart/form-data)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "data",
+                  "value": "{\"fullName\":\"Jane Updated\",\"userName\":\"jane_doe\"}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/users/update",
+              "host": ["{{base_url}}"],
+              "path": ["users", "update"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User updated successfully!\",\"meta\":null,\"data\":{\"id\":\"64b7b5e8f0c7e4a9b1234567\",\"fullName\":\"Jane Updated\",\"email\":\"jane@example.com\",\"profilePic\":\"http://localhost:5005/uploads/profile.jpg\"}}"
+            },
+            {
+              "name": "Failure - 400 (Invalid JSON in 'data')",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"Invalid JSON in 'data' field\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"Invalid JSON in 'data' field\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Delete User - DELETE /users/:userId",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 or Forbidden\", function () { pm.expect(pm.response.code).to.be.oneOf([200,403,404]); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User deleted successfully!\",\"meta\":null,\"data\":null}"
+            },
+            {
+              "name": "Failure - 403 (Forbidden non-admin)",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":403,\"message\":\"You don't have permission to access this resource\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"You don't have permission to access this resource\"}],\"stack\":null}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Forms",
+      "item": [
+        {
+          "name": "Submit Get In Touch - POST /getInTouch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"email\": \"contact@acme.com\",\n  \"message\": \"I'd like to learn more about your services.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/getInTouch",
+              "host": ["{{base_url}}"],
+              "path": ["getInTouch"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.id) pm.collectionVariables.set(\"last_form_id\", res.data.id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 201",
+              "originalRequest": {},
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Form submitted successfully\",\"meta\":null,\"data\":{\"id\":\"64c1f9a1e0b8f0a1a2b3c4d5\",\"userId\":\"64b7b5e8f0c7e4a9b1234567\",\"type\":\"GET_IN_TOUCH\",\"data\":{\"name\":\"Acme Corp\",\"email\":\"contact@acme.com\",\"message\":\"I'd like to learn more about your services.\"},\"ip\":\"127.0.0.1\",\"createdAt\":\"2025-12-27T00:00:00.000Z\"}}"
+            },
+            {
+              "name": "Failure - 400 (Validation error)",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"Name is required\",\"errorMessages\":[{\"path\":\"body.name\",\"message\":\"Name is required\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Contact - POST /contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Alice\",\n  \"last_name\": \"Smith\",\n  \"email\": \"alice@example.com\",\n  \"company_name\": \"Alice Co\",\n  \"country\": \"USA\",\n  \"project_type\": \"Web Development\",\n  \"budget_range\": \"$5k-$10k\",\n  \"message\": \"We need help building a new site.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.id) pm.collectionVariables.set(\"last_form_id\", res.data.id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 201",
+              "originalRequest": {},
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Form submitted successfully\",\"meta\":null,\"data\":{\"id\":\"64c1f9a1e0b8f0a1a2b3c4d6\",\"userId\":\"64b7b5e8f0c7e4a9b1234567\",\"type\":\"CONTACT\",\"data\":{\"first_name\":\"Alice\",\"last_name\":\"Smith\",\"email\":\"alice@example.com\",\"company_name\":\"Alice Co\",\"country\":\"USA\",\"project_type\":\"Web Development\",\"budget_range\":\"$5k-$10k\",\"message\":\"We need help building a new site.\"},\"ip\":\"127.0.0.1\",\"createdAt\":\"2025-12-27T00:00:00.000Z\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Consultation - POST /consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Bob\",\n  \"last_name\": \"Jones\",\n  \"email\": \"bob@example.com\",\n  \"company_name\": \"Bob LLC\",\n  \"timeline\": \"3 months\",\n  \"country\": \"UK\",\n  \"project_type\": \"Mobile App\",\n  \"budget_range\": \"$20k-$30k\",\n  \"helps\": [\"UX Design\",\"Backend\"],\n  \"project_details\": \"We need a cross-platform app.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/consultation",
+              "host": ["{{base_url}}"],
+              "path": ["consultation"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 Created\", function () { pm.response.to.have.status(201); });",
+                  "try {",
+                  "  var res = pm.response.json();",
+                  "  if (res && res.data && res.data.id) pm.collectionVariables.set(\"last_form_id\", res.data.id);",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 201",
+              "originalRequest": {},
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Form submitted successfully\",\"meta\":null,\"data\":{\"id\":\"64c1f9a1e0b8f0a1a2b3c4d7\",\"userId\":\"64b7b5e8f0c7e4a9b1234567\",\"type\":\"CONSULTATION\",\"data\":{\"first_name\":\"Bob\",\"last_name\":\"Jones\",\"email\":\"bob@example.com\",\"timeline\":\"3 months\",\"country\":\"UK\",\"project_type\":\"Mobile App\",\"budget_range\":\"$20k-$30k\",\"helps\":[\"UX Design\",\"Backend\"],\"project_details\":\"We need a cross-platform app.\"},\"ip\":\"127.0.0.1\",\"createdAt\":\"2025-12-27T00:00:00.000Z\"}}"
+            }
+          ]
+        },
+        {
+          "name": "Get Forms - GET /forms (pagination & filter)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/forms?page=1&limit=10&filter=getInTouch",
+              "host": ["{{base_url}}"],
+              "path": ["forms"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "filter",
+                  "value": "getInTouch"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200 (paged)",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Forms retrieved successfully\",\"meta\":{\"page\":1,\"limit\":10,\"total\":2,\"totalPage\":1},\"data\":[{\"id\":\"64c1f9a1e0b8f0a1a2b3c4d5\",\"type\":\"GET_IN_TOUCH\",\"userId\":\"64b7b5e8f0c7e4a9b1234567\",\"data\":{\"name\":\"Acme Corp\",\"email\":\"contact@acme.com\",\"message\":\"...\"},\"createdAt\":\"2025-12-27T00:00:00.000Z\"}]}"
+            }
+          ]
+        },
+        {
+          "name": "Get Forms By User - GET /forms/:userId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/forms/{{user_id}}?filter=contact",
+              "host": ["{{base_url}}"],
+              "path": ["forms", "{{user_id}}"],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "contact"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"User forms retrieved successfully\",\"meta\":null,\"data\":[{\"id\":\"64c1f9a1e0b8f0a1a2b3c4d6\",\"type\":\"CONTACT\",\"userId\":\"64b7b5e8f0c7e4a9b1234567\",\"data\":{\"first_name\":\"Alice\",\"last_name\":\"Smith\"},\"createdAt\":\"2025-12-27T00:00:00.000Z\"}]}"
+            },
+            {
+              "name": "Failure - 400 (Invalid user id in validation)",
+              "originalRequest": {},
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":400,\"message\":\"Invalid user id\",\"errorMessages\":[{\"path\":\"params.userId\",\"message\":\"Invalid user id\"}],\"stack\":null}"
+            }
+          ]
+        },
+        {
+          "name": "Get Form Stats - GET /forms/stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/forms/stats",
+              "host": ["{{base_url}}"],
+              "path": ["forms", "stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "try { var res = pm.response.json(); } catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success - 200",
+              "originalRequest": {},
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":true,\"message\":\"Form stats retrieved successfully\",\"meta\":null,\"data\":[{\"formType\":\"GET_IN_TOUCH\",\"totalSubmissions\":5,\"uniqueUsers\":5},{\"formType\":\"CONTACT\",\"totalSubmissions\":3,\"uniqueUsers\":3},{\"formType\":\"CONSULTATION\",\"totalSubmissions\":2,\"uniqueUsers\":2}]}"
+            },
+            {
+              "name": "Failure - 403 (Admin only)",
+              "originalRequest": {},
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\"success\":false,\"statusCode\":403,\"message\":\"You don't have permission to access this resource\",\"errorMessages\":[{\"path\":\"app\",\"message\":\"You don't have permission to access this resource\"}],\"stack\":null}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
