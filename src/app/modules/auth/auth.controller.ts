@@ -1,20 +1,8 @@
 import status from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import AppError from '../../errors/AppError';
 import { AuthService } from './auth.service';
 
-// Legacy link-based endpoints removed. Use OTP endpoints instead.
-const verifyEmail = catchAsync(async (_req, _res) => {
-  throw new AppError(400, 'Legacy link-based verification removed. Use OTP-based /auth/verify-otp');
-});
-
-const verifyResetPassLink = catchAsync(async (_req, _res) => {
-  throw new AppError(
-    400,
-    'Legacy link-based reset verification removed. Use OTP-based password reset flow'
-  );
-});
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -37,32 +25,21 @@ const login = catchAsync(async (req, res) => {
   });
 });
 
-const sendOtp = catchAsync(async (req, res) => {
-  const { email, purpose } = req.body;
-
-  const result = await AuthService.sendOtp(email, purpose || 'VERIFY');
-
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: result.message,
-  });
-});
-
 const resendOtp = catchAsync(async (req, res) => {
-  const { email, purpose } = req.body;
-
-  const result = await AuthService.resendOtp(email, purpose || 'VERIFY');
+  const { email } = req.body;
+  const result = await AuthService.resendOTP(email);
 
   sendResponse(res, {
     statusCode: status.OK,
-    message: result.message,
+    message: "New Otp sent!",
+    data: result
   });
 });
 
 const verifyOtp = catchAsync(async (req, res) => {
-  const { email, otp, purpose } = req.body;
+  const { email, otp } = req.body;
 
-  const result = await AuthService.verifyOtp(email, otp, purpose || 'VERIFY');
+  const result = await AuthService.verifyOtp(email, otp);
 
   const { accessToken, refreshToken } = result;
 
@@ -83,9 +60,9 @@ const verifyOtp = catchAsync(async (req, res) => {
 const changePassword = catchAsync(async (req, res) => {
   const email = req.user?.email as string;
 
-  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const { currentPassword, newPassword } = req.body;
 
-  await AuthService.changePassword(email, currentPassword, newPassword, confirmPassword);
+  await AuthService.changePassword(email, currentPassword, newPassword);
 
   sendResponse(res, {
     statusCode: status.OK,
@@ -104,67 +81,32 @@ const forgotPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  const { email, otp, newPassword, confirmPassword } = req.body;
+  const { id } = req.user;
+  const { newPassword, confirmPassword } = req.body;
 
-  const result = await AuthService.resetPassword(email, otp, newPassword, confirmPassword);
-
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: result.message,
-  });
-});
-
-// legacy resends removed. Use /auth/resend-otp instead.
-const resendVerificationLink = catchAsync(async (_req, _res) => {
-  throw new AppError(
-    400,
-    'Legacy link-based resend removed. Use /auth/send-otp or /auth/resend-otp'
-  );
-});
-
-const resendResetPassLink = catchAsync(async (_req, _res) => {
-  throw new AppError(
-    400,
-    'Legacy link-based resend removed. Use /auth/send-otp or /auth/resend-otp'
-  );
-});
-
-const getMe = catchAsync(async (req, res) => {
-  const email = req.user?.email as string;
-
-  const result = await AuthService.getMe(email);
+  await AuthService.resetPassword(id, newPassword, confirmPassword);
 
   sendResponse(res, {
     statusCode: status.OK,
-    message: 'User fetched successfully!',
-    data: result,
+    message: "Password reseted",
   });
 });
+const sendCustomerSupportEmail = catchAsync(async (req, res) => {
+  const payload = req.body;
 
-const refreshToken = catchAsync(async (req, res) => {
-  const { refreshToken } = req.cookies;
-
-  const result = await AuthService.refreshToken(refreshToken);
+  await AuthService.sendCustomerSupportEmail(payload);
 
   sendResponse(res, {
     statusCode: status.OK,
-    message: 'Access token is retrieved successfully!',
-    data: result,
+    message: "Your support request has been submitted successfully!",
   });
 });
-
 export const AuthController = {
   login,
-  getMe,
-  sendOtp,
   resendOtp,
   verifyOtp,
-  refreshToken,
   resetPassword,
   forgotPassword,
   changePassword,
-  verifyEmail,
-  verifyResetPassLink,
-  resendResetPassLink,
-  resendVerificationLink,
+  sendCustomerSupportEmail
 };

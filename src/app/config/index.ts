@@ -50,25 +50,6 @@ const config = {
     brevo_email: parsed.BREVO_EMAIL,
     form_submission_email: parsed.FORM_SUBMISSION_EMAIL,
   },
-  jwt: {
-    access: {
-      secret: parsed.JWT_ACCESS_SECRET,
-      expiresIn: parsed.JWT_ACCESS_EXPIRES_IN,
-    },
-    refresh: {
-      secret: parsed.JWT_REFRESH_SECRET,
-      expiresIn: parsed.JWT_REFRESH_EXPIRES_IN,
-    },
-    resetPassword: {
-      expiresIn: parsed.JWT_RESET_PASS_ACCESS_EXPIRES_IN,
-    },
-    otp: {
-      expiresInMinutes: parsed.OTP_EXPIRES_IN_MINUTES,
-      rateLimitCount: parsed.OTP_RATE_LIMIT_COUNT,
-      rateLimitWindowMinutes: parsed.OTP_RATE_LIMIT_WINDOW_MINUTES,
-      maxVerifyAttempts: parsed.OTP_MAX_VERIFY_ATTEMPTS,
-    },
-  },
   superAdmin: {
     email: parsed.SUPER_ADMIN_EMAIL,
     password: parsed.SUPER_ADMIN_PASSWORD,
@@ -82,6 +63,20 @@ const config = {
     email: parsed.VERIFY_EMAIL_LINK,
     resetPassUI: parsed.RESET_PASS_UI_LINK,
     resetPassLink: parsed.VERIFY_RESET_PASS_LINK,
+  },
+  smtp: {
+    email: process.env.SMTP_EMAIL,
+    pass: process.env.SMTP_PASS,
+    email_from: process.env.SMTP_EMAIL_FROM,
+    host: process.env.SMTP_HOST,
+    name: process.env.SMTP_NAME,
+    port: process.env.SMTP_PORT
+  },
+  jwt: {
+    access_secret: process.env.JWT_ACCESS_SECRET,
+    access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN,
+    refresh_token_secret: process.env.JWT_REFRESH_SECRET,
+    refresh_token_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   },
 };
 

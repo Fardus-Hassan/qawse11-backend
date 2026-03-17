@@ -3,19 +3,19 @@ import ApiError from '../../errors/AppError';
 import { User } from '@prisma/client';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { hashPassword } from '../../helpers/hashPassword';
-import { AuthService } from '../auth/auth.service';
 import { CreateUserDTO, UpdateUserDTO } from '../../types/user';
 import * as UsersRepo from '../../repositories/users.repository';
+import prisma from '../../utils/prisma';
+import { sendOTP } from '../../utils/sendOTP';
 
 const createUserIntoDB = async (payload: CreateUserDTO) => {
   // Check if user exists by email
-  const isUserExistByEmail = await UsersRepo.findUserByEmail(payload.email);
+  const isUserExist = await prisma.user.findUnique({
+    where: { email: payload.email },
+  });
 
-  if (isUserExistByEmail) {
-    throw new ApiError(
-      status.BAD_REQUEST,
-      `User with this email: ${payload.email} already exists!`
-    );
+  if (isUserExist) {
+    throw new ApiError(status.BAD_REQUEST, "User already exists");
   }
 
   const hashedPassword = await hashPassword(payload.password);
@@ -27,14 +27,11 @@ const createUserIntoDB = async (payload: CreateUserDTO) => {
     isVerified: false,
   };
 
-  await UsersRepo.createUser(userData as any);
+  const user = await prisma.user.create({
+    data: userData
+  })
+  await sendOTP(user.id);
 
-  // send OTP for verification
-  await AuthService.sendOtp(payload.email, 'VERIFY');
-
-  return {
-    message: 'We have sent a confirmation OTP to your email address. Please check your inbox.',
-  };
 };
 
 const getAllUserFromDB = async (query: Record<string, unknown>) => {
@@ -68,8 +65,8 @@ const updateUserIntoDB = async (userId: string, payload: UpdateUserDTO) => {
     throw new ApiError(status.NOT_FOUND, 'User not found!');
   }
 
-  if (!payload.profilePic && isUserExist.profilePic) {
-    payload.profilePic = isUserExist.profilePic;
+  if (!payload.profilePic && isUserExist.profileImage) {
+    payload.profilePic = isUserExist.profileImage;
   }
 
   const updatedUser = await UsersRepo.updateUser(userId, {

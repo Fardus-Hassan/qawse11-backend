@@ -19,7 +19,7 @@ const auth = (...requiredRoles: UserRole[]) => {
     }
 
     // Check if the token is valid
-    const verifiedUser = jwt.verify(token, config.jwt.access.secret as string) as JwtPayload;
+    const verifiedUser = jwt.verify(token, config.jwt.access_secret as string) as JwtPayload;
 
     const user = await prisma.user.findUnique({
       where: {

@@ -7,37 +7,106 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  fullName             String
+  email                String    @unique
+  password             String
+  profileImage         String?   @default("")
+  passwordChangedAt    DateTime?
+  isVerified           Boolean   @default(false)
+
+  // OTP fields (email-based verification)
+  otpCode              String?
+  otpExpiry            DateTime?
+  otpAttempts          Int       @default(0)
+  otpRequestCount      Int       @default(0)
+  otpRequestReset      DateTime?
+  otpPurpose           OTPPurpose?
+
+  role                 UserRole         @default(USER)
+  formSubmissionCount  Int              @default(0)
+  formSubmissions      FormSubmission[]
+  otp                  OTP?
+
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@map("users")
+}
+
+model OTP {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  otpCode      String
+  otpExpiresAt DateTime
+  userId       String   @unique @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, otpCode])
+  @@index([otpExpiresAt])
+}
+
+model FormSubmission {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  type      FormType
+  data      Json
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@map("form_submissions")
+}
+
+model FormStats {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  formType         FormType @unique
+  totalSubmissions Int      @default(0)
+  uniqueUsers      Int      @default(0)
+
+  @@map("form_stats")
+}
+
+model Form {
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Personal Info
+  firstName              String
+  lastName               String
+  email                  String
+  phoneNumber            String
+  // Company Info
+  companyName            String
+  websiteUrl             String?
+
+  // Business Details
+  industry               String
+  monthlyMarketingBudget String
+
+  // Goals
+  primaryGoal            String
+  currentMarketingChannels String[] // e.g. ["Increase Revenue", "Generate More Leads"]
+
+  // Additional
+  additionalDetails      String?
+
+  // Meta
+  ip                     String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("forms")
+}
+
+/* ================= ENUMS ================= */
+
 enum OTPPurpose {
   VERIFY
   RESET
-}
-
-model User {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  fullName          String
-  email             String         @unique
-  password          String
-  profilePic        String?        @default("")
-  passwordChangedAt DateTime?
-  isVerified        Boolean        @default(false)
-
-  // OTP fields for email-based verification (hashed storage)
-  otpCode           String?
-  otpExpiry         DateTime?
-  otpAttempts       Int            @default(0)
-  otpRequestCount   Int            @default(0)
-  otpRequestReset   DateTime?
-  otpPurpose        OTPPurpose?
-
-  // legacy/reset flags removed (link-based flows deprecated)
-
-  role              UserRole       @default(USER)
-  formSubmissionCount Int         @default(0)
-  formSubmissions    FormSubmission[]
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-
-  @@map("users")
 }
 
 enum FormType {
@@ -45,30 +114,6 @@ enum FormType {
   CONTACT
   CONSULTATION
 }
-
-model FormSubmission {
- id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  type      FormType
-  data      Json
-  ip        String?
-  createdAt DateTime  @default(now())
-
-  @@map("form_submissions")
-}
-
-model FormStats {
- id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  formType       FormType @unique
-  totalSubmissions Int    @default(0)
-  uniqueUsers    Int      @default(0)
-
-  @@map("form_stats")
-}
-
-
-
 
 enum Status {
   PROCESSING

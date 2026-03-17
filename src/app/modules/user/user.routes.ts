@@ -12,11 +12,11 @@ const router = Router();
 
 router.get('/', auth(UserRole.SUPER_ADMIN, UserRole.ADMIN), UserController.getAllUser);
 
-router.get(
-  '/:userId',
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
-  UserController.getSingleUserById
-);
+// router.get(
+//   '/:userId',
+//   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+//   UserController.getSingleUserById
+// );
 
 router.post(
   '/register',
@@ -43,6 +43,6 @@ router.patch(
   UserController.updateUser
 );
 
-router.delete('/:userId', auth(UserRole.SUPER_ADMIN, UserRole.ADMIN), UserController.deleteUser);
+// router.delete('/:userId', auth(UserRole.SUPER_ADMIN, UserRole.ADMIN), UserController.deleteUser);
 
 export const UserRoutes = router;

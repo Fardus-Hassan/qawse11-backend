@@ -23,7 +23,7 @@ const createToken = (jwtPayload: IJwtPayload, secret: string, expiresIn: string)
   );
 };
 
-const verifyToken = (token: string, secret = config.jwt.access.secret as string): JwtPayload => {
+const verifyToken = (token: string, secret = config.jwt.access_secret as string): JwtPayload => {
   try {
     return jwt.verify(token, secret) as JwtPayload;
   } catch (error: any) {

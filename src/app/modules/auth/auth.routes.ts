@@ -7,7 +7,6 @@ import { AuthValidation } from './auth.validation';
 
 const router = Router();
 
-router.post('/send-otp', validateRequest(AuthValidation.sendOtpSchema), AuthController.sendOtp);
 
 router.post('/resend-otp', validateRequest(AuthValidation.sendOtpSchema), AuthController.resendOtp);
 
@@ -34,12 +33,15 @@ router.post(
 
 router.post(
   '/reset-password',
+  auth(),
   validateRequest(AuthValidation.resetPasswordValidationSchema),
   AuthController.resetPassword
 );
 
-router.get('/me', auth(), AuthController.getMe);
-
-router.post('/refresh-token', AuthController.refreshToken);
+router.post(
+  '/send-support-mail',
+  validateRequest(AuthValidation.customerSupportValidationSchema),
+  AuthController.sendCustomerSupportEmail
+);
 
 export const AuthRoutes = router;

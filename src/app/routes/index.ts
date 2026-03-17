@@ -15,7 +15,7 @@ const moduleRoutes = [
     route: UserRoutes,
   },
   {
-    path: '/',
+    path: '/form',
     route: FormsRoutes,
   },
 ];

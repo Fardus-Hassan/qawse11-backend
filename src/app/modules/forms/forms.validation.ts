@@ -1,63 +1,23 @@
 import { z } from 'zod';
 
-export const getInTouchSchema = z.object({
+const createFormSchema = z.object({
   body: z.object({
-    name: z.string().min(1, { message: 'Name is required' }),
-    email: z.string().email({ message: 'Invalid email address' }),
-    message: z.string().min(1, { message: 'Message is required' }),
+    firstName: z.string({ required_error: 'First name is required' }).min(1, 'First name cannot be empty'),
+    lastName: z.string({ required_error: 'Last name is required' }).min(1, 'Last name cannot be empty'),
+    email: z.string({ required_error: 'Email is required' }).email('Invalid email address'),
+    phoneNumber: z.string({ required_error: 'Phone number is required' }).min(5, 'Phone number is too short'),
+    companyName: z.string({ required_error: 'Company name is required' }).min(1, 'Company name cannot be empty'),
+    websiteUrl: z.string().url('Invalid URL').optional(),
+    industry: z.string({ required_error: 'Industry is required' }).min(1, 'Industry cannot be empty'),
+    monthlyMarketingBudget: z.string({ required_error: 'Monthly marketing budget is required' }).min(1, 'Budget cannot be empty'),
+    primaryGoal: z.string({ required_error: 'Primary goal is required' }).min(1, 'Primary goal cannot be empty'),
+    currentMarketingChannels: z
+      .array(z.string())
+      .min(1, 'At least one marketing channel is required'),
+    additionalDetails: z.string().optional(),
   }),
 });
 
-export const contactSchema = z.object({
-  body: z.object({
-    first_name: z.string().min(1, { message: 'First name is required' }),
-    last_name: z.string().min(1, { message: 'Last name is required' }),
-    email: z.string().email({ message: 'Invalid email address' }),
-    company_name: z.string().optional(),
-    country: z.string().min(1, { message: 'Country is required' }),
-    project_type: z.string().min(1, { message: 'Project type is required' }),
-    budget_range: z.string().min(1, { message: 'Budget range is required' }),
-    message: z.string().min(1, { message: 'Message is required' }),
-  }),
-});
-
-export const consultationSchema = z.object({
-  body: z.object({
-    first_name: z.string().min(1, { message: 'First name is required' }),
-    last_name: z.string().min(1, { message: 'Last name is required' }),
-    email: z.string().email({ message: 'Invalid email address' }),
-    company_name: z.string().optional(),
-    timeline: z.string().min(1, { message: 'Timeline is required' }),
-    country: z.string().min(1, { message: 'Country is required' }),
-    project_type: z.string().min(1, { message: 'Project type is required' }),
-    budget_range: z.string().min(1, { message: 'Budget range is required' }),
-    helps: z.array(z.string()).optional(),
-    project_details: z.string().min(1, { message: 'Project details are required' }),
-  }),
-});
-
-export const getFormsQuerySchema = z.object({
-  query: z.object({
-    page: z
-      .string()
-      .optional()
-      .transform((v) => (v ? parseInt(v, 10) : undefined)),
-    limit: z
-      .string()
-      .optional()
-      .transform((v) => (v ? parseInt(v, 10) : undefined)),
-    filter: z.enum(['getInTouch', 'contact', 'consultation']).optional(),
-  }),
-});
-
-export const getFormsByUserSchema = z.object({
-  params: z.object({
-    userId: z.union([
-      z.string().uuid({ message: 'Invalid user id' }),
-      z.string().regex(/^[a-fA-F0-9]{24}$/, { message: 'Invalid user id' }),
-    ]),
-  }),
-  query: z.object({
-    filter: z.enum(['getInTouch', 'contact', 'consultation']).optional(),
-  }),
-});
+export const FormValidation = {
+  createFormSchema,
+};

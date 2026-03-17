@@ -6,10 +6,10 @@ import sendResponse from '../../utils/sendResponse';
 
 const createUser = catchAsync(async (req, res) => {
   const result = await UserService.createUserIntoDB(req.body);
-
   sendResponse(res, {
     statusCode: status.CREATED,
-    message: result.message,
+    message: "Account created!Verify your email!",
+    data: result
   });
 });
 
@@ -40,33 +40,32 @@ const updateUser = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleUserById = catchAsync(async (req, res) => {
-  const { userId } = req.params;
+// const getSingleUserById = catchAsync(async (req, res) => {
+//   const { userId } = req.params;
 
-  const result = await UserService.getSingleUserByIdFromDB(userId);
+//   const result = await UserService.getSingleUserByIdFromDB(userId);
 
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: 'User retrieved successfully!',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: status.OK,
+//     message: 'User retrieved successfully!',
+//     data: result,
+//   });
+// });
 
-const deleteUser = catchAsync(async (req, res) => {
-  const { userId } = req.params;
+// const deleteUser = catchAsync(async (req, res) => {
+//   const { userId } = req.params;
 
-  await UserService.deleteUserFromDB(userId);
+//   await UserService.deleteUserFromDB(userId);
 
-  sendResponse(res, {
-    statusCode: status.OK,
-    message: 'User deleted successfully!',
-  });
-});
+//   sendResponse(res, {
+//     statusCode: status.OK,
+//     message: 'User deleted successfully!',
+//   });
+// });
 
 export const UserController = {
   createUser,
   getAllUser,
   updateUser,
-  deleteUser,
-  getSingleUserById,
+
 };
