@@ -98,7 +98,7 @@ const sendCustomerSupportEmail = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: status.OK,
-    message: "Your support request has been submitted successfully!",
+    message: "You form submitted successful!",
   });
 });
 export const AuthController = {

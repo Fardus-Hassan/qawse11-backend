@@ -41,7 +41,7 @@ export const mailService = {
 
         const res = await transporter.sendMail({
             from: `${config.smtp.name} <${config.smtp.email_from}>`,
-            to: "rafioulhasan2@gmail.com", // sends to admin/business inbox
+            to: "hello@dima360marketing.com", // sends to admin/business inbox
             subject: `New Consultation Request from ${payload.firstName} ${payload.lastName}`,
             html,
         });
@@ -52,7 +52,7 @@ export const mailService = {
 
         const res = await transporter.sendMail({
             from: `${config.smtp.name} <${config.smtp.email_from}>`,
-            to: "rafioulhasan2@gmail.com", // sends to admin/business inbox
+            to: "hello@dima360marketing.com", // sends to admin/business inbox
             subject: `Customer Support Request: ${payload.subject}`,
             html,
         });
