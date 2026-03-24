@@ -40,6 +40,7 @@ router.post(
 
 router.post(
   '/send-support-mail',
+  auth(),
   validateRequest(AuthValidation.customerSupportValidationSchema),
   AuthController.sendCustomerSupportEmail
 );

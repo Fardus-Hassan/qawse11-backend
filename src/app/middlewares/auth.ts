@@ -15,7 +15,7 @@ const auth = (...requiredRoles: UserRole[]) => {
     }
 
     if (!token) {
-      throw new ApiError(status.UNAUTHORIZED, 'You are not authorized');
+      throw new ApiError(status.UNAUTHORIZED, 'Please sign up or log in to submit this form.');
     }
 
     // Check if the token is valid
