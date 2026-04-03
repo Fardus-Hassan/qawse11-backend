@@ -18,6 +18,19 @@ const createForm = catchAsync(async (req, res) => {
   });
 });
 
+const sendBooking = catchAsync(async (req, res) => {
+  const result = await FormService.sendBooking(req.body);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    message: 'Booking request sent successfully!',
+    data: result,
+  });
+
+});
+
 export const FormController = {
   createForm,
+  sendBooking,
 };
+

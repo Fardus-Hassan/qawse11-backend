@@ -18,6 +18,17 @@ const createFormSchema = z.object({
   }),
 });
 
+const bookingSchema = z.object({
+  body: z.object({
+    name: z.string({ required_error: 'Name is required' }).min(1, 'Name cannot be empty'),
+    email: z.string({ required_error: 'Email is required' }).email('Invalid email address'),
+    msg: z.string({ required_error: 'Message is required' }).min(1, 'Message cannot be empty'),
+    projectType: z.string().optional(),
+  }),
+});
+
 export const FormValidation = {
   createFormSchema,
+  bookingSchema,
 };
+

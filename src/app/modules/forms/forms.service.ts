@@ -24,6 +24,18 @@ const createForm = async (payload: {
   return form;
 };
 
+const sendBooking = async (payload: {
+  name: string;
+  email: string;
+  msg: string;
+  projectType?: string;
+}) => {
+  await mailService.sendBookingEmail(payload);
+  return { message: 'Booking request sent successfully!' };
+};
+
 export const FormService = {
   createForm,
+  sendBooking,
 };
+

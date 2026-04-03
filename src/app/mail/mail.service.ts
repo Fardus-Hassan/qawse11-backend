@@ -4,6 +4,8 @@ import { AuthTemplates } from "./Templates/AuthTemplates";
 import { GigTemplates } from "./Templates/GigTemplates";
 import { CustomerSupportTemplates } from "./Templates/CustomerSupportTemplates";
 import { ConsultationTemplates } from "./Templates/ConsultationTemplates";
+import { BookingTemplates } from "./Templates/BookingTemplates";
+
 
 export const mailService = {
     sendEmail: async (to: string, otp: string, subject: string) => {
@@ -58,6 +60,18 @@ export const mailService = {
         });
         return res;
     },
+    sendBookingEmail: async (payload: any) => {
+        const html = BookingTemplates.booking(payload);
+
+        const res = await transporter.sendMail({
+            from: `${config.smtp.name} <${config.smtp.email_from}>`,
+            to: "rafioulhasan2@gmail.com", // sends to admin/business inbox
+            subject: `New Booking Request from ${payload.name}`,
+            html,
+        });
+        return res;
+    },
+
 
 }
 

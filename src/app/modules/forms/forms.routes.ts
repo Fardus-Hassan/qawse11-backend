@@ -8,4 +8,11 @@ const router = Router();
 
 router.post('/create-form', auth(), validateRequest(FormValidation.createFormSchema), FormController.createForm);
 
+router.post(
+  '/send-booking',
+  validateRequest(FormValidation.bookingSchema),
+  FormController.sendBooking,
+);
+
 export const FormsRoutes = router;
+
