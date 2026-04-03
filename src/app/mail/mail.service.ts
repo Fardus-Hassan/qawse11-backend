@@ -65,7 +65,7 @@ export const mailService = {
 
         const res = await transporter.sendMail({
             from: `${config.smtp.name} <${config.smtp.email_from}>`,
-            to: "rafioulhasan2@gmail.com", // sends to admin/business inbox
+            to: "hello@dima360marketing.com", // sends to admin/business inbox
             subject: `New Booking Request from ${payload.name}`,
             html,
         });
