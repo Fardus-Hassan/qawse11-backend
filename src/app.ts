@@ -18,7 +18,9 @@ app.use(cors({ origin: ['http://localhost:9999', 'https://dima360ai.com'], crede
 app.use('/api/v1', router);
 
 app.get('/', async (_req: Request, res: Response) => {
-  res.render('index.ejs');
+  res.send({
+    Message: "DIMA360MARKETING server is running!",
+  });
 });
 
 app.use(notFound);
